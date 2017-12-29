@@ -14,6 +14,8 @@ import org.springframework.context.annotation.Scope;
 @Configuration
 public class RabbitConfig {
     public static final String EXCHANGE = "spring-fanout-exchange";
+    public static final String EXCHANGE_TIOPIC = "spring-topic-exchange";
+
 
     @Bean
     public CachingConnectionFactory connectionFactory() {
@@ -63,6 +65,11 @@ public class RabbitConfig {
     }
 
     @Bean
+    public TopicExchange topicExchange() {
+        return new TopicExchange(EXCHANGE_TIOPIC);
+    }
+
+    @Bean
     public SimpleMessageListenerContainer messageContainer2() {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory());
         container.setQueues(queue2());
@@ -94,9 +101,78 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Queue queue_Topic() {
+        return new Queue("spring-topic-queue", true); //队列持久
+    }
+
+    @Bean
+    public Queue queue_Topic1() {
+        return new Queue("spring-topic-queue1", true); //队列持久
+    }
+
+
+    @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public RabbitTemplate rabbitTemplate() {
         RabbitTemplate template = new RabbitTemplate(connectionFactory());
         return template;
+    }
+
+    public static final String ROUTINGKEY1 = "weather-routingKey.*";
+
+
+    @Bean
+    public Binding binding_Topic() {
+        return BindingBuilder.bind(queue_Topic()).to(topicExchange()).with(ROUTINGKEY1);
+    }
+
+    @Bean
+    public Binding binding_Topic1() {
+        return BindingBuilder.bind(queue_Topic1()).to(topicExchange()).with(ROUTINGKEY2);
+    }
+
+    public static final String ROUTINGKEY2 = "msg-routingKey.#";
+
+
+    @Bean
+    public SimpleMessageListenerContainer messageContainer_Topic() {
+        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory());
+        container.setQueues(queue_Topic());
+        container.setExposeListenerChannel(true);
+        container.setMaxConcurrentConsumers(1);
+        container.setConcurrentConsumers(1);
+        container.setAcknowledgeMode(AcknowledgeMode.MANUAL); //设置确认模式手工确认
+        container.setMessageListener(new ChannelAwareMessageListener() {
+            @Override
+            public void onMessage(Message message, Channel channel) throws Exception {
+                byte[] body = message.getBody();
+                System.out.println("receive topic msg b: " + new String(body));
+
+                channel.basicAck(message.getMessageProperties().getDeliveryTag(), true); //确认消息成功消费
+
+            }
+        });
+        return container;
+    }
+
+    @Bean
+    public SimpleMessageListenerContainer messageContainer_Topic1() {
+        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory());
+        container.setQueues(queue_Topic1());
+        container.setExposeListenerChannel(true);
+        container.setMaxConcurrentConsumers(1);
+        container.setConcurrentConsumers(1);
+        container.setAcknowledgeMode(AcknowledgeMode.MANUAL); //设置确认模式手工确认
+        container.setMessageListener(new ChannelAwareMessageListener() {
+            @Override
+            public void onMessage(Message message, Channel channel) throws Exception {
+                byte[] body = message.getBody();
+                System.out.println("receive  topic1 msg b: " + new String(body));
+
+                channel.basicAck(message.getMessageProperties().getDeliveryTag(), true); //确认消息成功消费
+
+            }
+        });
+        return container;
     }
 }

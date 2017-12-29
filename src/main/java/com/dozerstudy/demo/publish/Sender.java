@@ -11,8 +11,13 @@ public class Sender implements RabbitTemplate.ConfirmCallback {
     @Autowired
     RabbitTemplate template;
 
+//    public void send(String context) {
+//        template.convertAndSend(RabbitConfig.EXCHANGE, "", context);
+//        template.setConfirmCallback(this);
+//    }
+
     public void send(String context) {
-        template.convertAndSend(RabbitConfig.EXCHANGE, "", context);
+        template.convertAndSend(RabbitConfig.EXCHANGE_TIOPIC, "weather-routingKey.test", context);
         template.setConfirmCallback(this);
     }
 
