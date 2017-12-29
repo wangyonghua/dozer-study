@@ -30,7 +30,8 @@ public class DemoApplicationTests {
 //        System.out.println(desc);
 //        Assert.assertNotNull(desc);
 
-        System.out.println("float" + Float.MAX_VALUE);
+//        System.out.println("float" + Float.MAX_VALUE);
+        System.out.println(String.valueOf(new Date()));
     }
 
 }

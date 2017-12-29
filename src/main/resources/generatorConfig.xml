@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+    <properties resource="codegen.properties"/>
+    <context id="my" targetRuntime="MyBatis3">
+        <plugin type="com.solarterms.kokuu.plugins.MapperPlugin"/>
+        <commentGenerator>
+            <property name="suppressDate" value="false"/>
+            <property name="suppressAllComments" value="true"/>
+        </commentGenerator>
+
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/wintac_dev?characterEncoding=utf8"
+                        userId="root"
+                        password="123456"/>
+        <javaModelGenerator targetPackage="${javaModel_targetPackage}"
+                            targetProject="${javaModel_targetProject}">
+            <property name="enableSubPackages" value="true"/>
+            <property name="trimStrings" value="true"/>
+        </javaModelGenerator>
+
+        <sqlMapGenerator targetPackage="${sqlMap_targetPackage}"
+                         targetProject="${sqlMap_targetProject}">
+            <property name="enableSubPackages" value="true"/>
+        </sqlMapGenerator>
+
+        <javaClientGenerator targetPackage="${mapper_targetPackage}"
+                             targetProject="${mapper_targetProject}"
+                             type="XMLMAPPER">
+            <property name="enableSubPackages" value="true"/>
+        </javaClientGenerator>
+
+        <!--配置需要生成代码的数据表, 可配置多个table-->
+        <table tableName="facade_bank_auth" domainObjectName="facadeBandAuth">
+            <property name="rootClass" value="com.solarterms.kokuu.commons.bean.model.IdBean"/>
+        </table>
+
+
+    </context>
+</generatorConfiguration>
