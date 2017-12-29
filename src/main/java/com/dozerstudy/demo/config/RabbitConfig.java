@@ -4,9 +4,12 @@ import com.rabbitmq.client.Channel;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 
 @Configuration
 public class RabbitConfig {
@@ -51,9 +54,8 @@ public class RabbitConfig {
             public void onMessage(Message message, Channel channel) throws Exception {
                 byte[] body = message.getBody();
                 System.out.println("receive msg b: " + new String(body));
-                Thread.sleep(30000);
 
-                channel.basicAck(message.getMessageProperties().getDeliveryTag(), false); //确认消息成功消费
+                channel.basicAck(message.getMessageProperties().getDeliveryTag(), true); //确认消息成功消费
 
             }
         });
@@ -73,8 +75,7 @@ public class RabbitConfig {
             public void onMessage(Message message, Channel channel) throws Exception {
                 byte[] body = message.getBody();
                 System.out.println("receive msg a: " + new String(body));
-                Thread.sleep(30000);
-                channel.basicAck(message.getMessageProperties().getDeliveryTag(), false); //确认消息成功消费
+                channel.basicAck(message.getMessageProperties().getDeliveryTag(), true); //确认消息成功消费
 
 
             }
@@ -90,5 +91,12 @@ public class RabbitConfig {
     @Bean
     public Binding binding2() {
         return BindingBuilder.bind(queue2()).to(fanoutExchange());
+    }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public RabbitTemplate rabbitTemplate() {
+        RabbitTemplate template = new RabbitTemplate(connectionFactory());
+        return template;
     }
 }
